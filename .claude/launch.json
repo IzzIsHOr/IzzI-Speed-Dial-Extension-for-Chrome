@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "izzi-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["dev/server.cjs"],
+      "port": 5177
+    }
+  ]
+}

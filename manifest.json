@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "IzzI Speed Dial",
+  "version": "1.0.0",
+  "description": "Speed dial new tab: your own icons, folders and shortcuts, stored locally. No telemetry, no CDN, no affiliate links. Imports from Infinity New Tab.",
+  "minimum_chrome_version": "110",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "unlimitedStorage",
+    "favicon"
+  ],
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "src/newtab/index.html"
+  },
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "Add to IzzI Speed Dial",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src 'self' https:; img-src 'self' data: blob:"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "_favicon/*"
+      ]
+    }
+  ],
+  "homepage_url": "https://github.com/IzzIsHOr/IzzI-Speed-Dial-Extension-for-Chrome"
+}

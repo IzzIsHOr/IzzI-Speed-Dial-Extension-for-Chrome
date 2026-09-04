@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add to IzzI Speed Dial</title>
+    <link rel="stylesheet" href="../newtab/newtab.css" />
+    <style>
+      body {
+        width: 360px;
+        height: auto;
+        min-height: 300px;
+        overflow: visible;
+        background: var(--ui-bg);
+        color: var(--ui-fg);
+        padding: 16px;
+      }
+      h1 {
+        font-size: 14px;
+        margin: 0 0 14px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+      .icon-preview {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+      }
+      .icon-preview span {
+        font-size: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Add to IzzI Speed Dial</h1>
+    <div id="form"></div>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
