@@ -7,6 +7,7 @@ import {
   section,
   slider,
   toggle,
+  dropdown,
   toast,
   confirmDialog
 } from "./ui.js";
@@ -177,32 +178,24 @@ export function settingsDialog(settings, { onChange, onReload }) {
         p.append(
           section(
             "Pick a look",
-            "A theme only moves the sliders for you. Change anything afterwards and it stays changed.",
+            "Presets for the layout. Change anything afterwards and it sticks.",
             grid
           )
         );
 
         /* ---- background lives here too, it is part of the look ---- */
 
-        const kindSel = el(
-          "select",
-          {
-            onchange: (e) => {
-              settings.wallpaper.kind = e.target.value;
-              apply();
-              render();
-            }
-          },
-          el(
-            "option",
-            { value: "color", selected: settings.wallpaper.kind === "color" ? "selected" : false },
-            "Colour"
-          ),
-          el(
-            "option",
-            { value: "image", selected: settings.wallpaper.kind === "image" ? "selected" : false },
-            "Your own image"
-          )
+        const kindSel = dropdown(
+          settings.wallpaper.kind,
+          [
+            { value: "color", label: "Colour" },
+            { value: "image", label: "Your own image" }
+          ],
+          (v) => {
+            settings.wallpaper.kind = v;
+            apply();
+            render();
+          }
         );
 
         const bgRows = [row("Type", null, kindSel)];
@@ -211,7 +204,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
           bgRows.push(
             row(
               "Colour",
-              settings.wallpaper.gradient ? "the theme adds a gradient on top" : null,
+              settings.wallpaper.gradient ? "The theme adds a gradient on top" : null,
               el(
                 "div",
                 { style: "display:flex;gap:8px;align-items:center" },
@@ -244,7 +237,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
           bgRows.push(
             row(
               "Image",
-              "stays on this computer only",
+              "Stays on this computer",
               el(
                 "div",
                 { style: "display:flex;gap:8px" },
@@ -290,7 +283,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             ),
             row(
               "Darken",
-              "helps light photos keep the labels readable",
+              "Keeps labels readable on light photos",
               slider(settings.wallpaper.mask, 0, 0.8, 0.02, pct, (v) => {
                 settings.wallpaper.mask = v;
                 apply();
@@ -308,11 +301,11 @@ export function settingsDialog(settings, { onChange, onReload }) {
         p.append(
           section(
             "The grid",
-            `Currently ${settings.layout.col} across by ${settings.layout.row} down, ` +
-              `so ${settings.layout.col * settings.layout.row} shortcuts per page.`,
+            `${settings.layout.col} across, ${settings.layout.row} down. ` +
+              `${settings.layout.col * settings.layout.row} shortcuts per page.`,
             row(
               "Columns",
-              "icons across",
+              "Icons across",
               slider(settings.layout.col, 3, 12, 1, (v) => v, (v) => {
                 settings.layout.col = v;
                 applyManual();
@@ -320,7 +313,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             ),
             row(
               "Rows",
-              "icons down",
+              "Icons down",
               slider(settings.layout.row, 1, 8, 1, (v) => v, (v) => {
                 settings.layout.row = v;
                 applyManual();
@@ -344,7 +337,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             ),
             row(
               "Overall scale",
-              "grows or shrinks the whole centre block",
+              "Scales everything at once",
               slider(settings.behavior.mainRatio, 0.6, 1.6, 0.05, (v) => v.toFixed(2), (v) => {
                 settings.behavior.mainRatio = v;
                 applyManual();
@@ -356,7 +349,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             null,
             row(
               "Open shortcuts in a new tab",
-              "Ctrl-click always opens a new tab anyway",
+              "Ctrl-click always does",
               toggle(settings.behavior.openInNewTab, (v) => {
                 settings.behavior.openInNewTab = v;
                 apply();
@@ -372,7 +365,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             ),
             row(
               "Show page dots",
-              "the row of dots under the grid",
+              "The row under the grid",
               toggle(settings.behavior.showPageDots, (v) => {
                 settings.behavior.showPageDots = v;
                 apply();
@@ -391,7 +384,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             null,
             row(
               "Size",
-              "how much of its cell an icon fills",
+              "How much of its cell it fills",
               slider(settings.icon.scale, 0.2, 1, 0.02, pct, (v) => {
                 settings.icon.scale = v;
                 applyManual();
@@ -399,7 +392,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             ),
             row(
               "Corner rounding",
-              "all the way up makes them circles",
+              "All the way up makes circles",
               slider(settings.icon.radius, 0, 0.5, 0.01, (v) => Math.round(v * 200) + "%", (v) => {
                 settings.icon.radius = v;
                 applyManual();
@@ -415,7 +408,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             ),
             row(
               "Drop shadow",
-              "lifts icons off a busy photo",
+              "Helps on busy backgrounds",
               toggle(settings.icon.shadow, (v) => {
                 settings.icon.shadow = v;
                 applyManual();
@@ -480,29 +473,19 @@ export function settingsDialog(settings, { onChange, onReload }) {
       /* ------------------------------------------------------------ search */
 
       function searchTab(p) {
-        const engineSel = el(
-          "select",
-          {
-            onchange: (e) => {
-              settings.search.engine = e.target.value;
-              apply();
-            }
-          },
-          ...Object.entries(SEARCH_ENGINES).map(([k, v]) =>
-            el(
-              "option",
-              { value: k, selected: settings.search.engine === k ? "selected" : false },
-              v.name
-            )
-          )
+        const engineSel = dropdown(
+          settings.search.engine,
+          Object.entries(SEARCH_ENGINES).map(([k, v]) => ({ value: k, label: v.name })),
+          (v) => {
+            settings.search.engine = v;
+            apply();
+          }
         );
-        engineSel.style.width = "180px";
 
         p.append(
           section(
             "Search bar",
-            "There are no live suggestions, so nothing is requested from anyone while you type. " +
-              "Navigation happens only when you press Enter.",
+            "No live suggestions. Nothing is sent anywhere while you type.",
             row(
               "Show it",
               null,
@@ -511,7 +494,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
                 applyManual();
               })
             ),
-            row("Engine", "you can also click the badge on the bar itself", engineSel),
+            row("Engine", "Also on the badge in the bar", engineSel),
             row(
               "Open results in a new tab",
               null,
@@ -573,8 +556,8 @@ export function settingsDialog(settings, { onChange, onReload }) {
         p.append(
           section(
             "Coming from Infinity New Tab",
-            "Export a backup from Infinity, then load that .infinity file here. Shortcuts, " +
-              "folders, pages, layout and the wallpaper all come across.",
+            "Export a backup from Infinity, then load the .infinity file here. Shortcuts, " +
+              "folders, pages, layout and wallpaper all come across.",
             el(
               "div",
               { style: "margin:4px 0 2px" },
@@ -588,11 +571,11 @@ export function settingsDialog(settings, { onChange, onReload }) {
 
           section(
             "Sync through your Google account",
-            "Chrome caps this at 100 KB in total. Layout, settings and small icons fit; the " +
-              "background image and the full-resolution originals stay on this computer.",
+            "Chrome allows 100 KB. Layout, settings and small icons fit. " +
+              "Background images and full-size originals stay on this computer.",
             row(
               "Keep devices in sync",
-              "uses the account you are signed into Chrome with",
+              "The account Chrome is signed into",
               toggle(settings.sync.enabled, (v) => {
                 settings.sync.enabled = v;
                 apply();
@@ -601,7 +584,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             ),
             row(
               "Largest icon size to send",
-              "quality drops first, then size, if they will not fit",
+              "Quality drops first if space runs out",
               slider(settings.sync.iconSize, 48, 96, 16, (v) => v + "px", (v) => {
                 settings.sync.iconSize = v;
                 apply();
@@ -673,8 +656,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
 
           section(
             "Backup file",
-            "A .json backup holds everything, at full resolution, with no size limit. " +
-              "Keep one somewhere safe.",
+            "Holds everything at full resolution, with no size limit. Keep one somewhere safe.",
             el(
               "div",
               { style: "display:flex;gap:8px;flex-wrap:wrap" },
@@ -807,15 +789,13 @@ export function settingsDialog(settings, { onChange, onReload }) {
                 el("p", {
                   class: "note warn",
                   text:
-                    `This page is not running as the installed extension, so the ${info.remoteIcons} ` +
-                    "icons cannot be downloaded here. A plain web page has no host access, and the " +
-                    "browser blocks it from reading Infinity's CDN."
+                    `This page is not the installed extension, so the ${info.remoteIcons} icons ` +
+                    "cannot be fetched here. A plain web page has no host access."
                 }),
                 el("p", {
                   class: "note",
                   text:
-                    "Load the folder through chrome://extensions with Developer mode on, open a new " +
-                    "tab, and run the import from there. Everything else on this page still works."
+                    "Load it through chrome://extensions, open a new tab, and import from there."
                 })
               );
             } else if (info.remoteIcons) {
@@ -823,21 +803,20 @@ export function settingsDialog(settings, { onChange, onReload }) {
                 row(
                   `Download ${info.remoteIcons} icons`,
                   alreadyAllowed
-                    ? "access already granted"
+                    ? "Access already granted"
                     : info.iconOrigins.map((o) => o.replace(/^https?:\/\//, "")).join(", "),
                   toggle(choices.downloadIcons, (v) => (choices.downloadIcons = v))
                 ),
                 el("p", {
                   class: "note warn",
                   text:
-                    "Infinity does not put the artwork in the backup file, only links to its own CDN. " +
-                    "Recovering your icons means downloading them from there once. " +
+                    "Infinity keeps the artwork on its own CDN, not in the backup file, so the " +
+                    "icons have to be fetched from there once. " +
                     (alreadyAllowed
                       ? "You have already allowed that host."
-                      : "Chrome will ask you to allow that host when you press Import.") +
-                    " This is the only time this extension ever talks to Infinity, and nothing is " +
-                    "sent to them. Decline and every shortcut still imports, using the browser " +
-                    "favicon instead."
+                      : "Chrome will ask you to allow it.") +
+                    " Nothing is sent to them. Decline and the shortcuts still import, using " +
+                    "browser favicons."
                 })
               );
             }
@@ -845,7 +824,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
             body.append(
               row(
                 "Bring the layout across",
-                "rows, columns, spacing, icon size, fonts",
+                "Rows, columns, spacing, icon size, fonts",
                 toggle(choices.importSettings, (v) => (choices.importSettings = v))
               )
             );
@@ -854,7 +833,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
               body.append(
                 row(
                   "Bring the wallpaper across",
-                  KB(info.wallpaperBytes) + ", already inside the file",
+                  KB(info.wallpaperBytes) + ", already in the file",
                   toggle(choices.importWallpaper, (v) => (choices.importWallpaper = v))
                 )
               );
@@ -963,9 +942,8 @@ export function settingsDialog(settings, { onChange, onReload }) {
                   el("p", {
                     class: "note",
                     text:
-                      "If it says permission or fetch failed, run the import again and allow " +
-                      "access when Chrome asks. You can also set an icon by hand from the " +
-                      "shortcut's right-click menu."
+                      "If it mentions permission, run the import again and allow access when " +
+                      "Chrome asks. You can also set any icon by hand from its right-click menu."
                   })
                 );
                 footer.append(el("button", { class: "btn primary", onclick: () => close(true) }, "OK"));
@@ -990,21 +968,21 @@ export function settingsDialog(settings, { onChange, onReload }) {
             el("p", {
               class: "note",
               text:
-                "Icons live on your computer, in chrome.storage.local. There is no icon store and " +
-                "no CDN: nothing is loaded from anybody's server."
+                "Your icons are stored on this computer. There is no icon store and no CDN, so " +
+                "nothing loads from anybody's server."
             }),
             el("p", {
               class: "note",
               text:
-                "The extension holds no network permissions by default. It can reach the internet " +
-                "in exactly two places, both of which you trigger: \"Grab the icon from the site\", " +
-                "and importing icons from an Infinity backup. Each asks permission for those hosts alone."
+                "No network permissions by default. Two things can reach the internet, and you " +
+                "start both: grabbing an icon from a site, and importing icons from Infinity. " +
+                "Each asks for those hosts alone."
             }),
             el("p", {
               class: "note",
               text:
-                "Links go exactly where they say. Nothing is routed through an affiliate redirector. " +
-                "No analytics, no install or uninstall ping, no account on anyone else's server."
+                "Links go where they say. No affiliate redirects, no analytics, no account " +
+                "anywhere."
             })
           )
         );
