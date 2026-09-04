@@ -20,8 +20,13 @@ const dist = path.join(ROOT, "dist");
 const stage = path.join(dist, "izzi-speed-dial");
 const zip = path.join(dist, `izzi-speed-dial-${stamp}.zip`);
 
-fs.rmSync(dist, { recursive: true, force: true });
+// Only clear the staging folder and stale zips. dist/ also holds the store
+// screenshots, and wiping the whole thing threw those away on every build.
+fs.rmSync(stage, { recursive: true, force: true });
 fs.mkdirSync(stage, { recursive: true });
+for (const f of fs.existsSync(dist) ? fs.readdirSync(dist) : []) {
+  if (f.endsWith(".zip")) fs.rmSync(path.join(dist, f));
+}
 
 let files = 0;
 for (const entry of INCLUDE) {
