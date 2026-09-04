@@ -96,22 +96,33 @@ function render() {
   renderPagination();
 }
 
+// Cached here because render() runs on every drag, page switch and settings
+// tweak, and each of those has to repaint the wallpaper without re-reading
+// several megabytes out of storage.
+//   undefined = not read yet, null = nothing stored, string = the data URL
+let wallpaperData;
+
+async function loadWallpaperImage() {
+  wallpaperData = (await getWallpaper()) || null;
+  renderWallpaperColor();
+}
+
 function renderWallpaperColor() {
   const wp = $("#wallpaper");
+
   if (settings.wallpaper.kind === "color") {
     // the gradient, when a theme set one, rides on top of the flat colour
     wp.style.backgroundImage = settings.wallpaper.gradient || "";
     wp.style.backgroundColor = settings.wallpaper.color;
-  } else {
-    wp.style.backgroundImage = "";
-    wp.style.backgroundColor = "#111";
+    return;
   }
-}
 
-async function loadWallpaperImage() {
-  if (settings.wallpaper.kind !== "image") return;
-  const data = await getWallpaper();
-  if (data) $("#wallpaper").style.backgroundImage = `url("${data}")`;
+  wp.style.backgroundColor = "#111";
+  if (wallpaperData === undefined) {
+    loadWallpaperImage(); // repaints itself once the read comes back
+    return;
+  }
+  wp.style.backgroundImage = wallpaperData ? `url("${wallpaperData}")` : "";
 }
 
 function renderSearch() {
