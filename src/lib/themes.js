@@ -10,7 +10,7 @@ export const THEMES = [
   {
     id: "classic",
     name: "Classic",
-    hint: "6 x 3, the familiar arrangement",
+    hint: "The familiar 6 x 3 arrangement",
     background: { color: "#1b2030", gradient: "linear-gradient(160deg,#232a3d 0%,#141824 100%)" },
     patch: {
       layout: { row: 3, col: 6, rowGap: 0.4, colGap: 0.3 },
@@ -22,7 +22,7 @@ export const THEMES = [
   {
     id: "compact",
     name: "Compact",
-    hint: "8 x 4, more shortcuts on screen",
+    hint: "8 x 4. More shortcuts on screen",
     background: { color: "#171a21", gradient: "linear-gradient(160deg,#20242e 0%,#101317 100%)" },
     patch: {
       layout: { row: 4, col: 8, rowGap: 0.35, colGap: 0.28 },
@@ -34,7 +34,7 @@ export const THEMES = [
   {
     id: "spotlight",
     name: "Spotlight",
-    hint: "4 x 2, large tiles for the few you actually use",
+    hint: "4 x 2. Large tiles for the few you really use",
     background: { color: "#20142b", gradient: "linear-gradient(160deg,#33204a 0%,#150d1f 100%)" },
     patch: {
       layout: { row: 2, col: 4, rowGap: 0.5, colGap: 0.4 },
@@ -46,7 +46,7 @@ export const THEMES = [
   {
     id: "minimal",
     name: "Minimal",
-    hint: "5 x 2 circles, no names, no search bar",
+    hint: "Circles, no names, no search bar",
     background: { color: "#101215", gradient: "linear-gradient(180deg,#16191d 0%,#0b0d0f 100%)" },
     patch: {
       layout: { row: 2, col: 5, rowGap: 0.55, colGap: 0.45 },
@@ -58,7 +58,7 @@ export const THEMES = [
   {
     id: "dock",
     name: "Dock",
-    hint: "a single row of 9, like a taskbar",
+    hint: "A single row of 9, like a taskbar",
     background: { color: "#0f1b26", gradient: "linear-gradient(180deg,#15293a 0%,#0a1119 100%)" },
     patch: {
       layout: { row: 1, col: 9, rowGap: 0.3, colGap: 0.32 },
@@ -70,7 +70,7 @@ export const THEMES = [
   {
     id: "wall",
     name: "Wall",
-    hint: "10 x 5, everything at once, names off",
+    hint: "10 x 5. Everything at once, names off",
     background: { color: "#141414", gradient: "linear-gradient(160deg,#1e1e1e 0%,#0c0c0c 100%)" },
     patch: {
       layout: { row: 5, col: 10, rowGap: 0.3, colGap: 0.25 },
@@ -82,7 +82,7 @@ export const THEMES = [
   {
     id: "paper",
     name: "Paper",
-    hint: "6 x 3 on a light background, dark labels",
+    hint: "Light background with dark labels",
     background: { color: "#eceef2", gradient: "linear-gradient(160deg,#f6f7f9 0%,#dfe3ea 100%)" },
     patch: {
       layout: { row: 3, col: 6, rowGap: 0.42, colGap: 0.32 },
