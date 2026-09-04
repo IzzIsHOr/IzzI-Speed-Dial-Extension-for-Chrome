@@ -96,6 +96,34 @@ export function confirmDialog(title, message, { danger = false, okLabel = "Delet
   });
 }
 
+const MENU_ICONS = {
+  open: "M14 3h7v7M21 3l-9 9M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
+  edit: "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",
+  copy: "M10 8h9v12h-9zM5 16V4h9",
+  rename: "M4 20h16M7 15l9-9 3 3-9 9H7z",
+  folder: "M3 7h6l2 2h10v10H3z",
+  out: "M10 12h11M17 8l4 4-4 4M14 4H5v16h9",
+  trash: "M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13",
+  plus: "M12 5v14M5 12h14",
+  gear: "M4 7h16M4 12h16M4 17h16",
+  tick: "M4 12.5l5 5L20 7"
+};
+
+function menuIcon(name, cls = "ico") {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.8");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("class", cls);
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", MENU_ICONS[name] || MENU_ICONS.open);
+  svg.appendChild(path);
+  return svg;
+}
+
 export function contextMenu(x, y, entries) {
   document.querySelector(".ctx-menu")?.remove();
   const menu = el("div", { class: "ctx-menu" });
@@ -105,24 +133,30 @@ export function contextMenu(x, y, entries) {
       menu.appendChild(el("hr"));
       continue;
     }
-    menu.appendChild(
-      el("button", {
-        class: entry.danger ? "danger" : "",
-        text: entry.label,
-        onclick: () => {
-          menu.remove();
-          entry.run();
-        }
-      })
-    );
+    const item = el("button", {
+      class: (entry.danger ? "danger" : "") + (entry.checked ? " checked" : ""),
+      onclick: () => {
+        menu.remove();
+        entry.run();
+      }
+    });
+    if (entry.icon) item.appendChild(menuIcon(entry.icon));
+    item.appendChild(el("span", { text: entry.label }));
+    if (entry.checked) item.appendChild(menuIcon("tick", "tick"));
+    menu.appendChild(item);
   }
 
   menu.style.visibility = "hidden";
   document.body.appendChild(menu);
   const r = menu.getBoundingClientRect();
-  menu.style.left = Math.min(x, window.innerWidth - r.width - 8) + "px";
-  menu.style.top = Math.min(y, window.innerHeight - r.height - 8) + "px";
+  const left = Math.min(x, window.innerWidth - r.width - 8);
+  const top = Math.min(y, window.innerHeight - r.height - 8);
+  menu.style.left = left + "px";
+  menu.style.top = top + "px";
+  // grow from whichever corner is nearest the click
+  menu.style.transformOrigin = `${x - left}px ${y - top}px`;
   menu.style.visibility = "visible";
+  menu.classList.add("in");
 
   const dismiss = (e) => {
     if (menu.contains(e.target)) return;
@@ -152,19 +186,60 @@ export function row(label, hint, control) {
 
 export function slider(value, min, max, step, format, onInput) {
   const val = el("span", { class: "val", text: format(value) });
+  // the track is a gradient, so --fill has to follow the value for the
+  // filled part to end where the thumb is
+  const fill = (v) => ((v - min) / (max - min)) * 100 + "%";
   const input = el("input", {
     type: "range",
     min,
     max,
     step,
     value,
+    style: "--fill:" + fill(value),
     oninput: (e) => {
       const v = Number(e.target.value);
+      e.target.style.setProperty("--fill", fill(v));
       val.textContent = format(v);
       onInput(v);
     }
   });
-  return el("div", { style: "display:flex;align-items:center;gap:10px" }, input, val);
+  return el("div", { class: "slider-wrap" }, input, val);
+}
+
+/**
+ * A dropdown that belongs to the extension rather than the operating system.
+ * A native <select> cannot have its popup styled at all, so this draws its own.
+ */
+export function dropdown(value, options, onChange) {
+  const current = () => options.find((o) => o.value === value) || options[0];
+  const label = el("span", { text: current().label });
+  const button = el(
+    "button",
+    { class: "dropdown", type: "button" },
+    label,
+    el("i", { class: "caret" })
+  );
+
+  button.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const r = button.getBoundingClientRect();
+    const menu = contextMenu(
+      r.left,
+      r.bottom + 6,
+      options.map((o) => ({
+        label: o.label,
+        checked: o.value === value,
+        run: () => {
+          value = o.value;
+          label.textContent = o.label;
+          onChange(o.value);
+        }
+      }))
+    );
+    menu.style.minWidth = r.width + "px";
+  });
+
+  return button;
 }
 
 export function toggle(checked, onChange) {

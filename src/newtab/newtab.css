@@ -499,38 +499,86 @@ button {
 .ctx-menu {
   position: fixed;
   z-index: 1200;
-  min-width: 180px;
-  background: var(--ui-bg);
+  min-width: 190px;
+  padding: 6px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ui-bg) 88%, transparent);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  border: 1px solid color-mix(in srgb, var(--ui-fg) 12%, transparent);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.16);
   color: var(--ui-fg);
-  border-radius: 8px;
-  box-shadow: var(--ui-shadow);
-  padding: 6px 0;
-  overflow: hidden;
+  transform: scale(0.94);
+  opacity: 0;
+  transition: transform 0.13s cubic-bezier(0.2, 0.9, 0.3, 1.1), opacity 0.13s ease;
+}
+
+.ctx-menu.in {
+  transform: scale(1);
+  opacity: 1;
 }
 
 .ctx-menu button {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   text-align: left;
-  padding: 8px 18px;
+  padding: 8px 10px;
   border: none;
+  border-radius: 8px;
   background: none;
   color: inherit;
   font-size: 13px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.ctx-menu button > span {
+  flex: 1;
+}
+
+.ctx-menu .ico {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  opacity: 0.62;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.ctx-menu .tick {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--ui-accent);
+  opacity: 1;
 }
 
 .ctx-menu button:hover {
-  background: rgba(127, 127, 127, 0.14);
+  background: color-mix(in srgb, var(--ui-accent) 14%, transparent);
+  color: var(--ui-accent);
+}
+
+.ctx-menu button:hover .ico {
+  opacity: 1;
+  transform: scale(1.08);
 }
 
 .ctx-menu button.danger {
   color: var(--ui-danger);
 }
 
+.ctx-menu button.danger:hover {
+  background: color-mix(in srgb, var(--ui-danger) 14%, transparent);
+}
+
+.ctx-menu button.checked {
+  color: var(--ui-accent);
+}
+
 .ctx-menu hr {
   border: none;
-  border-top: 1px solid var(--ui-line);
-  margin: 5px 0;
+  border-top: 1px solid color-mix(in srgb, var(--ui-fg) 10%, transparent);
+  margin: 5px 8px;
 }
 
 /* --------------------------------------------------------------- dialogs */
@@ -1081,4 +1129,173 @@ button {
   font-size: 11px;
   line-height: 1.35;
   display: block;
+}
+
+/* ------------------------------------------- controls that are ours, not the OS */
+
+/* range: native track and thumb replaced, with the filled part following --fill */
+
+.slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 168px;
+  height: 20px;
+  background: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--ui-accent) var(--fill, 50%),
+    color-mix(in srgb, var(--ui-fg) 16%, transparent) var(--fill, 50%)
+  );
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.14s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.14s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.18);
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.32);
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.38);
+}
+
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-accent) 32%, transparent);
+}
+
+/* colour swatch: the picker itself is the OS, but the button is ours */
+
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 44px;
+  height: 27px;
+  padding: 0;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.13s cubic-bezier(0.2, 0.9, 0.3, 1.2), border-color 0.13s ease;
+}
+
+input[type="color"]:hover {
+  transform: scale(1.07);
+  border-color: var(--ui-muted);
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 3px;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 5px;
+}
+
+/* dropdown: a native select popup cannot be styled, so this is a button + our menu */
+
+.dropdown {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 180px;
+  padding: 8px 11px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: none;
+  color: var(--ui-fg);
+  font-size: 13px;
+  transition: border-color 0.13s ease, background 0.13s ease;
+}
+
+.dropdown:hover {
+  border-color: var(--ui-muted);
+  background: color-mix(in srgb, var(--ui-fg) 5%, transparent);
+}
+
+.dropdown .caret {
+  width: 0;
+  height: 0;
+  flex: 0 0 auto;
+  border-style: solid;
+  border-width: 5px 4px 0;
+  border-color: currentColor transparent transparent;
+  opacity: 0.55;
+  transition: transform 0.15s ease;
+}
+
+.dropdown:hover .caret {
+  transform: translateY(1px);
+  opacity: 0.9;
+}
+
+/* buttons and rows get a little life */
+
+.btn {
+  transition: background 0.13s ease, border-color 0.13s ease, transform 0.1s ease,
+    color 0.13s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.theme-card:active {
+  transform: scale(0.985);
+}
+
+.row {
+  transition: background 0.13s ease;
+  border-radius: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+}
+
+.row:hover {
+  background: color-mix(in srgb, var(--ui-fg) 4%, transparent);
+}
+
+.dialog {
+  animation: dialogIn 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.05);
+}
+
+@keyframes dialogIn {
+  from {
+    transform: scale(0.96) translateY(6px);
+    opacity: 0;
+  }
+}
+
+.tabs button {
+  transition: color 0.13s ease, border-color 0.13s ease;
+}
+
+.tabs button:hover {
+  color: var(--ui-fg);
 }

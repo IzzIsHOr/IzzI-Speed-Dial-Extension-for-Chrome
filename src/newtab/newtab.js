@@ -126,6 +126,10 @@ function renderWallpaperColor() {
 }
 
 function renderSearch() {
+  // Hide the whole .search-box, not just the bar inside it. The box carries a
+  // negative --search-margin-top, so leaving an empty one behind drags the grid
+  // up off centre instead of letting the flex row centre it in the window.
+  document.querySelector(".search-box").classList.toggle("hide", !settings.search.show);
   $("#searchWrap").classList.toggle("hide", !settings.search.show);
   const engine = SEARCH_ENGINES[settings.search.engine] || SEARCH_ENGINES.google;
   const badge = $("#engineBadge");
@@ -391,6 +395,7 @@ function pageMenu(e, i) {
   contextMenu(e.clientX, e.clientY, [
     {
       label: "Rename page",
+      icon: "rename",
       run: async () => {
         const name = await renameDialog("Rename page", doc.pages[i].name);
         if (name) {
@@ -403,6 +408,7 @@ function pageMenu(e, i) {
     "-",
     {
       label: "Delete page",
+      icon: "trash",
       danger: true,
       run: async () => {
         if (doc.pages.length === 1) return toast("This is the only page.");
@@ -495,9 +501,14 @@ function itemMenu(e, item, { inFolder } = {}) {
 
   if (item.type === "link") {
     entries.push(
-      { label: "Open in new tab", run: () => window.open(item.url, "_blank", "noopener") },
+      {
+        label: "Open in new tab",
+        icon: "open",
+        run: () => window.open(item.url, "_blank", "noopener")
+      },
       {
         label: "Edit",
+        icon: "edit",
         run: async () => {
           const updated = await itemDialog(item);
           if (!updated) return;
@@ -510,6 +521,7 @@ function itemMenu(e, item, { inFolder } = {}) {
       },
       {
         label: "Copy address",
+        icon: "copy",
         run: () => {
           navigator.clipboard.writeText(item.url);
           toast("Address copied.");
@@ -517,11 +529,12 @@ function itemMenu(e, item, { inFolder } = {}) {
       }
     );
   } else {
-    entries.push({ label: "Open folder", run: () => openFolder(item.id) });
+    entries.push({ label: "Open folder", icon: "folder", run: () => openFolder(item.id) });
   }
 
   entries.push({
     label: "Rename",
+    icon: "rename",
     run: async () => {
       const name = await renameDialog("Rename", item.name);
       if (name) {
@@ -538,6 +551,7 @@ function itemMenu(e, item, { inFolder } = {}) {
   if (inFolder) {
     entries.push({
       label: "Move out of folder",
+      icon: "out",
       run: async () => {
         document.querySelector(".folder-overlay")?.remove();
         await moveTo(item.id, itemsOfPage(doc.pages[pageIndex].id).length);
@@ -547,6 +561,7 @@ function itemMenu(e, item, { inFolder } = {}) {
 
   entries.push("-", {
     label: "Delete",
+    icon: "trash",
     danger: true,
     run: async () => {
       if (
@@ -669,10 +684,15 @@ async function boot() {
     if (e.target.closest(".icon") || e.target.closest(".dot") || e.target.closest(".dialog")) return;
     e.preventDefault();
     contextMenu(e.clientX, e.clientY, [
-      { label: "Add a shortcut", run: () => addItem(itemsOfPage(doc.pages[pageIndex].id).length) },
+      {
+        label: "Add a shortcut",
+        icon: "plus",
+        run: () => addItem(itemsOfPage(doc.pages[pageIndex].id).length)
+      },
       "-",
       {
         label: "Settings",
+        icon: "gear",
         run: () => settingsDialog(settings, { onChange: () => render(), onReload: reload })
       }
     ]);
