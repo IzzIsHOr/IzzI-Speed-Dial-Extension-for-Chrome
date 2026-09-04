@@ -9,12 +9,21 @@ with no network permissions at all.
 
 ## Install
 
-1. `chrome://extensions`
+Grab the zip from [Releases](https://github.com/IzzIsHOr/IzzI-Speed-Dial-Extension-for-Chrome/releases),
+unzip it somewhere you will not move, then:
+
+1. Open `chrome://extensions`
 2. Turn on **Developer mode** (top right)
-3. **Load unpacked** → pick this folder
+3. Click **Load unpacked** and pick the unzipped folder
 4. Open a new tab
 
 Chrome will ask whether to change your new tab page. Accept.
+
+Chrome shows a "Disable developer mode extensions" bubble on startup for
+anything installed this way. That is Chrome's warning about unreviewed
+extensions in general, not about this one; dismiss it and it stays installed.
+The only way to remove that bubble, and to get automatic updates, is the
+Chrome Web Store.
 
 > An unpacked extension's ID is derived from its folder path, and all your data
 > is keyed to that ID. Once loaded, **do not move or rename the folder** or

@@ -6,3 +6,6 @@ dev/cdn/
 dev/*.infinity
 *.infinity
 izzi-speed-dial-*.json
+
+# build output
+dist/
