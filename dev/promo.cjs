@@ -2,11 +2,11 @@
 //
 // Needs the dev server running: node dev/server.cjs
 //
-// The store rejects any image carrying an alpha channel, and headless Chrome
-// writes RGBA PNGs, so each capture is decoded and re-encoded as a 24-bit
-// truecolour PNG. Compositing onto an opaque background first would be wrong
-// here anyway: the tiles are already fully opaque, the alpha channel is simply
-// along for the ride.
+// The store rejects any image carrying an alpha channel. Headless Chrome
+// already writes 24-bit truecolour for a page with an opaque background, which
+// these are, so in practice nothing needs converting. The decode and re-encode
+// stays as a guard: it fails loudly rather than uploading something the store
+// will bounce, and prints the channel count so the check is visible.
 
 const fs = require("fs");
 const path = require("path");
