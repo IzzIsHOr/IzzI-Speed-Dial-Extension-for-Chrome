@@ -777,6 +777,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
           importSettings: true,
           importWallpaper: info.hasWallpaper
         };
+        let permissionNote = null;
 
         const go = await openDialog({
           title: "Import from Infinity New Tab",
@@ -850,20 +851,36 @@ export function settingsDialog(settings, { onChange, onReload }) {
 
             footer.append(
               el("button", { class: "btn", onclick: () => close(false) }, "Cancel"),
-              el("button", { class: "btn primary", onclick: () => close(true) }, "Import")
+              el("button", {
+                class: "btn primary",
+                text: "Import",
+                // The permission has to be asked for here, first thing inside the
+                // click handler. Chrome only allows permissions.request() while a
+                // user gesture is live, and the gesture does not survive awaiting
+                // the dialog, so asking after this closes silently fails and the
+                // icons quietly never download.
+                onclick: async (e) => {
+                  const btn = e.currentTarget;
+                  if (choices.downloadIcons && info.iconOrigins.length) {
+                    btn.disabled = true;
+                    const r = await requestIconPermission(info.iconOrigins);
+                    btn.disabled = false;
+                    if (!r.granted) {
+                      choices.downloadIcons = false;
+                      permissionNote = r.error
+                        ? "Could not ask for permission: " + r.error
+                        : "Permission declined.";
+                    }
+                  }
+                  close(true);
+                }
+              })
             );
           }
         });
 
         if (!go) return;
-
-        if (choices.downloadIcons && info.iconOrigins.length) {
-          const granted = await requestIconPermission(info.iconOrigins);
-          if (!granted) {
-            choices.downloadIcons = false;
-            toast("Permission declined, importing with browser favicons instead.");
-          }
-        }
+        if (permissionNote) toast(permissionNote + " Importing with browser favicons instead.", 6000);
 
         const label = el("p", { class: "note", text: "Working…" });
         const bar = el("div", { class: "meter" }, el("i", { style: "width:0%" }));
@@ -886,14 +903,48 @@ export function settingsDialog(settings, { onChange, onReload }) {
           });
           closeProgress();
           onReload();
-          toast(
+
+          const summary =
             `Imported ${stats.links} shortcuts` +
-              (stats.folders ? `, ${stats.folders} folders` : "") +
-              (stats.iconsDownloaded ? `, ${stats.iconsDownloaded} icons` : "") +
-              (stats.iconsFailed ? ` (${stats.iconsFailed} icons failed)` : "") +
-              (stats.skipped ? `, ${stats.skipped} skipped` : "") +
-              "."
-          );
+            (stats.folders ? `, ${stats.folders} folders` : "") +
+            (stats.iconsDownloaded ? `, ${stats.iconsDownloaded} icons` : "") +
+            (stats.skipped ? `, ${stats.skipped} skipped` : "") +
+            ".";
+
+          if (stats.iconsFailed) {
+            // do not bury this in a toast: the user asked for icons and did not get them
+            openDialog({
+              title: "Imported, but some icons did not arrive",
+              build: ({ close, body, footer }) => {
+                body.append(
+                  el("p", { class: "note", text: summary }),
+                  el("p", {
+                    class: "note warn",
+                    text: `${stats.iconsFailed} of them could not be downloaded. Those shortcuts fall back to the browser favicon.`
+                  })
+                );
+                if (stats.errors.length) {
+                  body.append(
+                    el("p", { class: "note", text: "What went wrong:" }),
+                    el("ul", { class: "note", style: "margin:0;padding-left:18px" },
+                      ...stats.errors.map((m) => el("li", { text: m })))
+                  );
+                }
+                body.append(
+                  el("p", {
+                    class: "note",
+                    text:
+                      "If it says permission or fetch failed, run the import again and allow " +
+                      "access when Chrome asks. You can also set an icon by hand from the " +
+                      "shortcut's right-click menu."
+                  })
+                );
+                footer.append(el("button", { class: "btn primary", onclick: () => close(true) }, "OK"));
+              }
+            });
+          } else {
+            toast(summary);
+          }
         } catch (e) {
           closeProgress();
           toast("Import failed: " + e.message);

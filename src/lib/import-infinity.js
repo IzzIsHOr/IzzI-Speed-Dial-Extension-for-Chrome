@@ -117,10 +117,33 @@ export function inspectInfinityBackup(data) {
   };
 }
 
-/** Asks for permission on exactly the CDN hosts this backup references. */
+/**
+ * Asks for permission on exactly the CDN hosts this backup references.
+ *
+ * Chrome only allows permissions.request() while a user gesture is live, and a
+ * gesture does not survive an await on a dialog. Call this from inside the
+ * click handler itself, before anything else in it.
+ */
 export async function requestIconPermission(origins) {
+  if (!origins.length) return { granted: true };
+  try {
+    const granted = await chrome.permissions.request({
+      origins: origins.map((o) => o + "/*")
+    });
+    return { granted };
+  } catch (e) {
+    return { granted: false, error: (e && e.message) || String(e) };
+  }
+}
+
+/** Whether those hosts are already allowed, so we can skip asking again. */
+export async function hasIconPermission(origins) {
   if (!origins.length) return true;
-  return chrome.permissions.request({ origins: origins.map((o) => o + "/*") });
+  try {
+    return await chrome.permissions.contains({ origins: origins.map((o) => o + "/*") });
+  } catch {
+    return false;
+  }
 }
 
 async function downloadIcon(url) {
@@ -205,7 +228,7 @@ export async function importInfinity(data, opts = {}) {
   const rawPages = data.data.site.sites;
   const pages = [];
   const items = [];
-  const stats = { links: 0, folders: 0, iconsDownloaded: 0, iconsFailed: 0, skipped: 0 };
+  const stats = { links: 0, folders: 0, iconsDownloaded: 0, iconsFailed: 0, skipped: 0, errors: [] };
 
   // one pass to count downloads, so progress means something
   let toDownload = 0;
@@ -257,8 +280,12 @@ export async function importInfinity(data, opts = {}) {
         const hash = await putBlob(await downloadIcon(raw.bgImage));
         icon = { kind: "image", hash, bg: plateFor(raw) };
         stats.iconsDownloaded++;
-      } catch {
-        stats.iconsFailed++; // the favicon fallback already covers this
+      } catch (e) {
+        // the favicon fallback covers the icon, but say why it happened
+        stats.iconsFailed++;
+        if (stats.errors.length < 4) {
+          stats.errors.push((raw.name || hostOf(url)) + ": " + ((e && e.message) || e));
+        }
       }
       done++;
     } else if (raw.bgType === "image" && (raw.bgImage || "").startsWith("data:")) {
@@ -268,8 +295,11 @@ export async function importInfinity(data, opts = {}) {
         const hash = await putBlob(cropToDataURL(img, FULL_SIZE, null, "image/webp", 0.92));
         icon = { kind: "image", hash, bg: plateFor(raw) };
         stats.iconsDownloaded++;
-      } catch {
+      } catch (e) {
         stats.iconsFailed++;
+        if (stats.errors.length < 4) {
+          stats.errors.push((raw.name || hostOf(url)) + ": " + ((e && e.message) || e));
+        }
       }
     }
 
