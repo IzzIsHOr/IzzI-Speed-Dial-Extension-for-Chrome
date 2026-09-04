@@ -205,3 +205,10 @@ Syntax check:
 ```bash
 for f in src/**/*.js; do node --check "$f"; done
 ```
+
+The icons are generated, not drawn by hand. Edit the constants at the top of
+`dev/make-icons.cjs` and run it to rewrite all four sizes:
+
+```bash
+node dev/make-icons.cjs
+```
