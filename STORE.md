@@ -166,7 +166,12 @@ https://github.com/IzzIsHOr/IzzI-Speed-Dial-Extension-for-Chrome/blob/main/PRIVA
 
 ## Assets
 
-- **Store icon**: `icons/icon128.png`
+- **Store icon** (128x128): `dist/promo/store-icon-128.png`
+
+  Not `icons/icon128.png`. The store's listing icon is uploaded separately from
+  the ones in the package, and Google asks for 96x96 of artwork inside a 128px
+  canvas. The packaged icon fills all 128, which renders noticeably larger than
+  every other extension in a row.
 - **Screenshots** (1280x800): `dist/shots/`
   - `01-grid.png` — the grid in use, with a folder
   - `02-themes.png` — the seven layouts

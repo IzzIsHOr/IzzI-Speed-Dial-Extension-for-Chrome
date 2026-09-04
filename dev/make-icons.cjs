@@ -137,9 +137,25 @@ function render(size) {
   return out;
 }
 
-const dir = path.resolve(__dirname, "..", "icons");
+const ROOT = path.resolve(__dirname, "..");
+const dir = path.join(ROOT, "icons");
 for (const size of [16, 32, 48, 128]) {
   const file = path.join(dir, `icon${size}.png`);
   fs.writeFileSync(file, png(size, render(size)));
-  console.log("wrote", path.relative(path.resolve(__dirname, ".."), file));
+  console.log("wrote", path.relative(ROOT, file));
 }
+
+// The Chrome Web Store wants its listing icon to sit in a 96px square inside a
+// 128px canvas. Without that padding it renders noticeably larger than every
+// other extension in a row, which reads as sloppy rather than bold.
+const promo = path.join(ROOT, "dist", "promo");
+fs.mkdirSync(promo, { recursive: true });
+
+const inner = render(96);
+const canvas = Buffer.alloc(128 * 128 * 4); // transparent
+for (let y = 0; y < 96; y++) {
+  inner.copy(canvas, ((y + 16) * 128 + 16) * 4, y * 96 * 4, (y + 1) * 96 * 4);
+}
+const storeIcon = path.join(promo, "store-icon-128.png");
+fs.writeFileSync(storeIcon, png(128, canvas));
+console.log("wrote", path.relative(ROOT, storeIcon), "(96px artwork, 16px padding)");
