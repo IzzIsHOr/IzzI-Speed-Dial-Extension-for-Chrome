@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IzzI Speed Dial",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Speed dial new tab: your own icons, folders and shortcuts, stored locally. No telemetry, no CDN, no affiliate links. Imports from Infinity New Tab.",
   "minimum_chrome_version": "110",
   "permissions": [
