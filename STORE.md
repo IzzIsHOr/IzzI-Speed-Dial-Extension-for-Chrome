@@ -173,7 +173,12 @@ https://github.com/IzzIsHOr/IzzI-Speed-Dial-Extension-for-Chrome/blob/main/PRIVA
   - `03-layout.png` — grid controls
   - `04-icons.png` — icon appearance controls
   - `05-menu.png` — right-click menu
-- **Small promo tile** (optional, 440x280): not made yet
+- **Small promo tile** (440x280): `dist/promo/small-promo-440x280.png`
+- **Marquee promo tile** (1400x560): `dist/promo/marquee-promo-1400x560.png`
+
+  Both are rendered from `dev/promo.html` by `node dev/promo.cjs`. The store
+  refuses any image with an alpha channel and headless Chrome writes RGBA, so
+  the script decodes each capture and re-encodes it as 24-bit truecolour.
 
 The dashboard accepts up to five screenshots, so all five can go in. Put
 `01-grid.png` first; it is the one shown on the listing card.

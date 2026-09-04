@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Promo tiles</title>
+    <style>
+      /* Store promo tiles. ?tile=small gives 440x280, ?tile=marquee 1400x560.
+         The background is fully opaque on purpose: the store rejects anything
+         with an alpha channel. */
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      html,
+      body {
+        background: #4f8dfb;
+      }
+
+      .tile {
+        position: relative;
+        overflow: hidden;
+        display: none;
+        font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, Arial, sans-serif;
+        color: #fff;
+        background: linear-gradient(150deg, #4f8dfb 0%, #6d4bf0 52%, #7c3aed 100%);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body[data-tile="small"] .tile.small,
+      body[data-tile="marquee"] .tile.marquee {
+        display: flex;
+      }
+
+      /* soft light blooms, so the gradient does not read as a flat slab */
+      .tile::before,
+      .tile::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.19), transparent 68%);
+      }
+
+      /* ------------------------------------------------------------ small */
+
+      .tile.small {
+        width: 440px;
+        height: 280px;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 38px;
+      }
+
+      .tile.small::before {
+        width: 420px;
+        height: 420px;
+        top: -190px;
+        right: -140px;
+      }
+
+      .tile.small::after {
+        width: 320px;
+        height: 320px;
+        bottom: -180px;
+        left: -110px;
+      }
+
+      .tile.small .mark {
+        width: 74px;
+        height: 74px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .tile.small h1 {
+        font-size: 35px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        position: relative;
+        z-index: 1;
+      }
+
+      .tile.small p {
+        margin-top: 9px;
+        font-size: 16.5px;
+        font-weight: 400;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.88);
+        position: relative;
+        z-index: 1;
+      }
+
+      /* ---------------------------------------------------------- marquee */
+
+      .tile.marquee {
+        width: 1400px;
+        height: 560px;
+        align-items: center;
+        padding: 0 92px;
+        gap: 70px;
+      }
+
+      .tile.marquee::before {
+        width: 780px;
+        height: 780px;
+        top: -350px;
+        right: -180px;
+      }
+
+      .tile.marquee::after {
+        width: 560px;
+        height: 560px;
+        bottom: -330px;
+        left: -150px;
+      }
+
+      .copy {
+        position: relative;
+        z-index: 1;
+        flex: 0 0 500px;
+      }
+
+      .copy .mark {
+        width: 94px;
+        height: 94px;
+        margin-bottom: 26px;
+      }
+
+      .copy h1 {
+        font-size: 57px;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        line-height: 1.05;
+      }
+
+      .copy p {
+        margin-top: 16px;
+        font-size: 22px;
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .copy ul {
+        margin-top: 26px;
+        padding: 0;
+        list-style: none;
+        font-size: 17.5px;
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      .copy li {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 11px;
+      }
+
+      .copy li i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #fbbf24;
+        flex: 0 0 auto;
+      }
+
+      /* the grid on the right is the real thing, drawn to the same rules */
+
+      .preview {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px 34px;
+      }
+
+      .cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 11px;
+      }
+
+      .cell .art {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 43px;
+        font-weight: 600;
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+      }
+
+      .cell span {
+        font-size: 14.5px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.93);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tile small">
+      <img class="mark" src="/icons/icon128.png" alt="" />
+      <h1>IzzI Speed Dial</h1>
+      <p>Your new tab, your icons.<br />Everything stored on your machine.</p>
+    </div>
+
+    <div class="tile marquee">
+      <div class="copy">
+        <img class="mark" src="/icons/icon128.png" alt="" />
+        <h1>IzzI Speed Dial</h1>
+        <p>Your new tab, your icons. Everything stored on your machine.</p>
+        <ul>
+          <li><i></i>Drag, drop, group into folders</li>
+          <li><i></i>Crop any image into an icon</li>
+          <li><i></i>Seven layouts, from a dock to a wall</li>
+          <li><i></i>No tracking, no icon CDN, no affiliate links</li>
+        </ul>
+      </div>
+
+      <div class="preview">
+        <div class="cell"><div class="art" style="background:#24292f">G</div><span>GitHub</span></div>
+        <div class="cell"><div class="art" style="background:#ff0000">Y</div><span>YouTube</span></div>
+        <div class="cell"><div class="art" style="background:#ea4335">G</div><span>Gmail</span></div>
+        <div class="cell"><div class="art" style="background:#a259ff">F</div><span>Figma</span></div>
+        <div class="cell"><div class="art" style="background:#1db954">S</div><span>Spotify</span></div>
+        <div class="cell"><div class="art" style="background:#ff4500">R</div><span>Reddit</span></div>
+        <div class="cell"><div class="art" style="background:#1a73e8">D</div><span>Drive</span></div>
+        <div class="cell"><div class="art" style="background:#1b2838">S</div><span>Steam</span></div>
+      </div>
+    </div>
+
+    <script>
+      document.body.dataset.tile =
+        new URLSearchParams(location.search).get("tile") || "small";
+    </script>
+  </body>
+</html>
