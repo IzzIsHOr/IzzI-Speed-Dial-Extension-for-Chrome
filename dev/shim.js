@@ -83,8 +83,15 @@
       getURL: (p) => (p.startsWith("/_favicon") ? SVG : new URL(p, location.origin).href),
       lastError: null
     },
+    // Deliberately absent from the real API surface: a plain page can neither
+    // grant host access nor bypass CORS, so anything that needs it must detect
+    // this context and say so rather than pretend it worked.
     permissions: {
-      request: async () => confirm("[shim] Extensia ar cere permisiune pentru acest domeniu. Accepti?")
+      request: async () => {
+        console.warn("[shim] permissions.request cannot work outside the installed extension");
+        return false;
+      },
+      contains: async () => false
     },
     tabs: {
       query: async () => [{ url: location.href, title: document.title }],
@@ -92,5 +99,9 @@
     }
   };
 
-  console.log("[shim] API-urile chrome.* sunt simulate. Nu e extensia reala.");
+  console.warn(
+    "[shim] chrome.* is faked. This is a plain page, not the installed extension. " +
+      "No host permissions and no CORS bypass, so downloading icons from a remote " +
+      "CDN cannot work here. Load the folder via chrome://extensions for that."
+  );
 })();

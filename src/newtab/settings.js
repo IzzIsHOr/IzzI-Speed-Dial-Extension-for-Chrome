@@ -24,7 +24,9 @@ import { downloadBackup, pickBackupFile, restoreBackup } from "../lib/backup.js"
 import {
   inspectInfinityBackup,
   importInfinity,
-  requestIconPermission
+  requestIconPermission,
+  hasIconPermission,
+  isExtensionContext
 } from "../lib/import-infinity.js";
 import { readFileAsDataURL } from "../lib/imgutil.js";
 import { SEARCH_ENGINES, DEFAULT_SETTINGS } from "../lib/defaults.js";
@@ -772,8 +774,14 @@ export function settingsDialog(settings, { onChange, onReload }) {
           return toast(e.message);
         }
 
+        // Opened as a plain page there is no chrome.permissions to ask with and
+        // no host permissions to lift CORS, so icons can never download. Say so
+        // up front instead of letting the import look broken.
+        const asExtension = isExtensionContext();
+        const alreadyAllowed = await hasIconPermission(info.iconOrigins);
+
         const choices = {
-          downloadIcons: info.remoteIcons > 0,
+          downloadIcons: info.remoteIcons > 0 && asExtension,
           importSettings: true,
           importWallpaper: info.hasWallpaper
         };
@@ -794,21 +802,42 @@ export function settingsDialog(settings, { onChange, onReload }) {
               })
             );
 
-            if (info.remoteIcons) {
+            if (info.remoteIcons && !asExtension) {
+              body.append(
+                el("p", {
+                  class: "note warn",
+                  text:
+                    `This page is not running as the installed extension, so the ${info.remoteIcons} ` +
+                    "icons cannot be downloaded here. A plain web page has no host access, and the " +
+                    "browser blocks it from reading Infinity's CDN."
+                }),
+                el("p", {
+                  class: "note",
+                  text:
+                    "Load the folder through chrome://extensions with Developer mode on, open a new " +
+                    "tab, and run the import from there. Everything else on this page still works."
+                })
+              );
+            } else if (info.remoteIcons) {
               body.append(
                 row(
                   `Download ${info.remoteIcons} icons`,
-                  info.iconOrigins.map((o) => o.replace(/^https?:\/\//, "")).join(", "),
+                  alreadyAllowed
+                    ? "access already granted"
+                    : info.iconOrigins.map((o) => o.replace(/^https?:\/\//, "")).join(", "),
                   toggle(choices.downloadIcons, (v) => (choices.downloadIcons = v))
                 ),
                 el("p", {
                   class: "note warn",
                   text:
                     "Infinity does not put the artwork in the backup file, only links to its own CDN. " +
-                    "Recovering your icons means downloading them from there once. Chrome will ask you " +
-                    "to allow that host. This is the only time this extension ever talks to Infinity, " +
-                    "and nothing is sent to them. Decline and every shortcut still imports, using the " +
-                    "browser favicon instead."
+                    "Recovering your icons means downloading them from there once. " +
+                    (alreadyAllowed
+                      ? "You have already allowed that host."
+                      : "Chrome will ask you to allow that host when you press Import.") +
+                    " This is the only time this extension ever talks to Infinity, and nothing is " +
+                    "sent to them. Decline and every shortcut still imports, using the browser " +
+                    "favicon instead."
                 })
               );
             }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IzzI Speed Dial",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Speed dial new tab: your own icons, folders and shortcuts, stored locally. No telemetry, no CDN, no affiliate links. Imports from Infinity New Tab.",
   "minimum_chrome_version": "110",
   "permissions": [
@@ -11,6 +11,8 @@
     "favicon"
   ],
   "optional_host_permissions": [
+    "https://*.infinitynewtab.com/*",
+    "https://*.inftab.com/*",
     "<all_urls>"
   ],
   "chrome_url_overrides": {

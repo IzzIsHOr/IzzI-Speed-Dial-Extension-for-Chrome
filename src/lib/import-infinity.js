@@ -118,6 +118,23 @@ export function inspectInfinityBackup(data) {
 }
 
 /**
+ * True only when this really is the installed extension.
+ *
+ * Opened as a plain page (the dev harness, or dev-preview.html), there is no
+ * chrome.permissions to ask with and no host permissions to lift CORS, so an
+ * icon download can never succeed. Worth saying out loud rather than failing
+ * quietly and looking like a bug in the import.
+ */
+export function isExtensionContext() {
+  return (
+    location.protocol === "chrome-extension:" &&
+    typeof chrome !== "undefined" &&
+    Boolean(chrome.runtime && chrome.runtime.id) &&
+    Boolean(chrome.permissions && chrome.permissions.request)
+  );
+}
+
+/**
  * Asks for permission on exactly the CDN hosts this backup references.
  *
  * Chrome only allows permissions.request() while a user gesture is live, and a
@@ -126,6 +143,13 @@ export function inspectInfinityBackup(data) {
  */
 export async function requestIconPermission(origins) {
   if (!origins.length) return { granted: true };
+  if (!isExtensionContext()) {
+    return {
+      granted: false,
+      error:
+        "this page is not running as the installed extension, so it cannot ask for host access"
+    };
+  }
   try {
     const granted = await chrome.permissions.request({
       origins: origins.map((o) => o + "/*")
@@ -139,6 +163,7 @@ export async function requestIconPermission(origins) {
 /** Whether those hosts are already allowed, so we can skip asking again. */
 export async function hasIconPermission(origins) {
   if (!origins.length) return true;
+  if (!isExtensionContext()) return false;
   try {
     return await chrome.permissions.contains({ origins: origins.map((o) => o + "/*") });
   } catch {

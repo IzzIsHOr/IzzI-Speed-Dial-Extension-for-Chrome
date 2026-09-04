@@ -65,6 +65,12 @@ This is the only time this extension ever contacts Infinity, it is a plain GET
 of your own images, and nothing is sent to them. Decline it and every shortcut
 still imports, falling back to the browser's favicon.
 
+> Icons can only be downloaded by the **installed** extension. Run the import
+> from a real new tab after loading the folder through `chrome://extensions`.
+> Opened as a plain page (`dev-preview.html`, or the dev server) there is no
+> host access and the browser blocks the CDN read, so the import dialog says so
+> and skips the download.
+
 Their icons are PNGs that are mostly transparent (measured on real ones: 63-84%
 fully clear pixels), and that transparency survives the WebP re-encode intact.
 Imported icons therefore get **no plate behind them** unless Infinity's own
