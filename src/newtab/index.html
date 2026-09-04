@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>&lrm;</title>
+    <link rel="stylesheet" href="newtab.css" />
+  </head>
+  <body>
+    <div class="wallpaper layer" id="wallpaper"><div class="wallpaper-mask"></div></div>
+
+    <div class="main-middle layer">
+      <section class="main-middle-center layer">
+        <div class="search-box">
+          <div class="newtab-search" id="searchWrap">
+            <form class="search-card shadow" id="searchForm">
+              <button type="button" class="search-card-engine" id="engineBtn" title="Change search engine">
+                <span class="search-engine-badge" id="engineBadge">G</span>
+                <i class="icon-down"></i>
+              </button>
+              <input
+                class="search-card-input"
+                id="searchInput"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Search, or type a URL"
+              />
+              <button type="submit" class="search-card-btn" title="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.6-3.6" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="site-box">
+          <div class="site-items" id="siteItems"></div>
+          <div class="swiper-pagination" id="pagination"></div>
+        </div>
+      </section>
+
+      <button class="page-nav page-prev hide" id="pagePrev" title="Previous page">&#8249;</button>
+      <button class="page-nav page-next hide" id="pageNext" title="Next page">&#8250;</button>
+
+      <div class="top-right">
+        <button class="round-btn" id="addBtn" title="Add a shortcut">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+        <button class="round-btn" id="settingsBtn" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <script type="module" src="newtab.js"></script>
+  </body>
+</html>

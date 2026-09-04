@@ -1,0 +1,8 @@
+node_modules/
+*.log
+
+# personal data and scratch files, never commit these
+dev/cdn/
+dev/*.infinity
+*.infinity
+izzi-speed-dial-*.json
