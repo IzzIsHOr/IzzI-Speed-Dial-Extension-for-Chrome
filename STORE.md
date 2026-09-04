@@ -15,10 +15,14 @@ the dev server is running.
 IzzI Speed Dial
 ```
 
-## Short description (132 characters max)
+## Short description
+
+There is no field for this in the dashboard. The store uses the manifest's
+`description`, and Chrome rejects the upload if it runs past **132 characters**.
+Currently 121:
 
 ```
-A speed dial new tab. Your own icons, folders and pages, stored on your machine. No tracking, no icon CDN, no affiliate links.
+A speed dial new tab. Your own icons, folders and pages, stored on your machine. No tracking, no CDN, no affiliate links.
 ```
 
 ## Detailed description
