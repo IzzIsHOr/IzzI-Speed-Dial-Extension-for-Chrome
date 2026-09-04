@@ -138,7 +138,9 @@ function encodeRgb(width, height, channels, pixels) {
 
 /* ---------------------------------------------------------------- capture */
 
-fs.rmSync(OUT, { recursive: true, force: true });
+// Only replace the tiles this script owns. dist/promo also holds the store
+// listing icon, written by make-icons.cjs, and clearing the folder threw it
+// away on every run.
 fs.mkdirSync(OUT, { recursive: true });
 
 for (const [name, tile, w, h] of TILES) {
