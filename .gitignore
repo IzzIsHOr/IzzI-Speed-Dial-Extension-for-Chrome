@@ -9,3 +9,6 @@ izzi-speed-dial-*.json
 
 # build output
 dist/
+
+# one-off investigation files
+dev/pip-test.*
