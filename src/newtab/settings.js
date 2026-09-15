@@ -114,6 +114,25 @@ export function settingsDialog(settings, { onChange, onReload }) {
           "Reset appearance"
         ),
         el("div", { style: "flex:1" }),
+        // Only ever here, at the bottom of the settings panel: there if someone
+        // goes looking, never in the way of anyone who is not. The same block,
+        // markup and shape live in IzzI 5.1 YouTube's options page.
+        el(
+          "div",
+          { class: "coffee" },
+          el("span", { class: "coffee-line", text: "Free and staying that way 🎀" }),
+          el(
+            "a",
+            {
+              class: "coffee-btn",
+              href: "https://buymeacoffee.com/izzishor",
+              target: "_blank",
+              rel: "noreferrer"
+            },
+            "Buy Me a Coffee ☕"
+          )
+        ),
+        el("div", { style: "flex:1" }),
         el(
           "button",
           { class: "btn primary", onclick: () => dialog.querySelector(".close").click() },
