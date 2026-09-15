@@ -3,8 +3,10 @@
 export function el(tag, attrs = {}, ...kids) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
+    // No `html` option on purpose. It existed, nothing used it, and an
+    // innerHTML sink sitting unused in a helper is only ever waiting to be
+    // reached for with something untrusted.
     if (k === "class") node.className = v;
-    else if (k === "html") node.innerHTML = v;
     else if (k === "text") node.textContent = v;
     else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
     else if (v !== null && v !== undefined && v !== false) node.setAttribute(k, v);

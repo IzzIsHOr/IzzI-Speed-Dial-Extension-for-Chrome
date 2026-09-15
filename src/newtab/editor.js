@@ -501,7 +501,11 @@ export function itemDialog(existing, opts = {}) {
         const url = normalizeUrl(draft.url);
         if (!url) {
           urlInput.focus();
-          return toast("The address is missing.");
+          return toast(
+            draft.url.trim()
+              ? "Only http and https addresses can be saved."
+              : "The address is missing."
+          );
         }
         try {
           new URL(url);

@@ -101,9 +101,25 @@ export function hostOf(url) {
   }
 }
 
+/**
+ * Turns what someone typed into an address worth saving, or "" if it is not.
+ *
+ * Only http and https get through. Any scheme was accepted before, which meant
+ * a `javascript:` address could be saved by hand or arrive inside an imported
+ * backup and then be navigated to from a page that holds chrome.* access. The
+ * page CSP refuses to run it, but a link that exists only to be blocked has no
+ * business being stored in the first place.
+ */
 export function normalizeUrl(input) {
   const s = String(input || "").trim();
   if (!s) return "";
-  if (/^[a-z][a-z0-9+.-]*:/i.test(s)) return s;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(s)) {
+    return /^https?:\/\//i.test(s) ? s : "";
+  }
   return "https://" + s;
+}
+
+/** True for the data: URLs an icon or a wallpaper is allowed to be. */
+export function isImageDataUrl(v) {
+  return typeof v === "string" && /^data:image\/(png|jpe?g|webp|gif|avif|svg\+xml);base64,[A-Za-z0-9+/=\s]+$/i.test(v);
 }

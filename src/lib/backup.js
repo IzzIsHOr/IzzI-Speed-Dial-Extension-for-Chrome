@@ -3,7 +3,8 @@
 // Unlike sync, everything fits here: icons at full resolution and the wallpaper.
 // This is the safety net for when the 100 KB of sync are not enough.
 
-import { SCHEMA_VERSION } from "./defaults.js";
+import { SCHEMA_VERSION, DEFAULT_SETTINGS } from "./defaults.js";
+import { isImageDataUrl, normalizeUrl } from "./imgutil.js";
 import {
   loadDoc,
   loadSettings,
@@ -78,11 +79,38 @@ export async function restoreBackup(data, mode = "replace") {
     throw new Error("The backup holds no valid document.");
   }
 
-  // icons first, so no item is ever left pointing at a missing hash
+  // A backup is a file the user picked, which makes it untrusted input: it may
+  // have been edited, or handed to them by someone else. Everything below is
+  // checked before it reaches storage, because an icon ends up inside a CSS
+  // url() and an item's address ends up in an href on a privileged page.
   const remap = {};
+  let droppedBlobs = 0;
   for (const [hash, dataURL] of Object.entries(data.blobs || {})) {
+    if (!isImageDataUrl(dataURL)) {
+      droppedBlobs++;
+      continue;
+    }
     remap[hash] = await putBlob(dataURL);
   }
+
+  // links keep only addresses that can actually be opened; folders keep only
+  // the children that survive
+  let droppedItems = 0;
+  const clean = (list) =>
+    (Array.isArray(list) ? list : []).reduce((keep, it) => {
+      if (!it || typeof it !== "object") return keep;
+      if (it.type === "folder") {
+        keep.push({ ...it, children: clean(it.children) });
+        return keep;
+      }
+      if (!normalizeUrl(it.url)) {
+        droppedItems++;
+        return keep;
+      }
+      keep.push(it);
+      return keep;
+    }, []);
+  data.doc.items = clean(data.doc.items);
   const fix = (doc) =>
     walkItems(doc, (it) => {
       if (it.icon && it.icon.kind === "image" && remap[it.icon.hash]) {
@@ -110,15 +138,29 @@ export async function restoreBackup(data, mode = "replace") {
     doc = data.doc;
   }
 
-  if (data.settings) await saveSettings(data.settings);
-  if (data.wallpaper) await setWallpaper(data.wallpaper);
+  // settings are merged onto the defaults rather than replacing them, and the
+  // gradient is a raw CSS value so it only survives if it looks like one
+  if (data.settings && typeof data.settings === "object") {
+    const s = { ...DEFAULT_SETTINGS, ...data.settings };
+    s.wallpaper = { ...DEFAULT_SETTINGS.wallpaper, ...(data.settings.wallpaper || {}) };
+    if (typeof s.wallpaper.gradient !== "string" || !/^(linear|radial|conic)-gradient\(/i.test(s.wallpaper.gradient)) {
+      s.wallpaper.gradient = null;
+    }
+    await saveSettings(s);
+  }
+  if (isImageDataUrl(data.wallpaper)) await setWallpaper(data.wallpaper);
   await saveDoc(doc);
   await gcBlobs(doc);
   await pushSync();
 
   let count = 0;
   walkItems(doc, () => count++);
-  return { items: count, icons: Object.keys(remap).length, mode };
+  return {
+    items: count,
+    icons: Object.keys(remap).length,
+    mode,
+    dropped: droppedItems + droppedBlobs
+  };
 }
 
 export function pickBackupFile() {

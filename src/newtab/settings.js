@@ -783,7 +783,10 @@ export function settingsDialog(settings, { onChange, onReload }) {
             }
             const r = await restoreBackup(data, mode);
             onReload();
-            toast(`Restored: ${r.items} items, ${r.icons} icons.`);
+            toast(
+              `Restored: ${r.items} items, ${r.icons} icons.` +
+                (r.dropped ? ` ${r.dropped} entries were not valid and were skipped.` : "")
+            );
           } catch (e) {
             toast(e.message);
           }
