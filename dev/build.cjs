@@ -49,6 +49,17 @@ for (const entry of INCLUDE) {
   }
 }
 
+// `key` pins the extension ID for a local unpacked install, so moving the
+// folder does not orphan the user's data. The Chrome Web Store assigns its own
+// ID and does not want it, so it is stripped from the uploaded package.
+const staged = path.join(stage, "manifest.json");
+const m = JSON.parse(fs.readFileSync(staged, "utf8"));
+if (m.key) {
+  delete m.key;
+  fs.writeFileSync(staged, JSON.stringify(m, null, 2) + "\n");
+  console.log("stripped `key` from the packaged manifest");
+}
+
 // PowerShell ships with Windows, so no zip dependency is needed
 execFileSync(
   "powershell",

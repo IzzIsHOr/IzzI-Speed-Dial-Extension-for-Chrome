@@ -25,10 +25,15 @@ extensions in general, not about this one; dismiss it and it stays installed.
 The only way to remove that bubble, and to get automatic updates, is the
 Chrome Web Store.
 
-> An unpacked extension's ID is derived from its folder path, and all your data
-> is keyed to that ID. Once loaded, **do not move or rename the folder** or
-> Chrome treats it as a different extension and you start from an empty page.
-> Export a `.json` backup first if you need to move it.
+> This build pins its extension ID with a `key` in the manifest, so the folder
+> can be moved or renamed and your shortcuts survive. Without that key Chrome
+> derives the ID from the folder path, and **both** `storage.local` and
+> `storage.sync` are namespaced per ID, so moving the folder orphans everything,
+> sync included.
+>
+> The ID does still change when you switch between a local install and the Chrome
+> Web Store version, because the store signs with its own key. Export a `.json`
+> backup before that one move.
 
 ## Themes
 

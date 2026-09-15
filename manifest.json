@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "IzzI Speed Dial",
-  "version": "1.1.3",
+  "version": "1.1.4",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyr9lq/JQtfkBaLuoImX9HbPv2uTnXouJglQ8vurvqrt7SCJhusICh9l3h6not3UD7I3bsCr/YfuS3IeaNAlVpEKEukXFIqPFA6pigytlNI0PzKnw72mcP1ztBgP+Q1007zK6WxeFNU+YKFLoQxehxIpDHJvmk128RLFJFvoUtg8ruthFEQZVWMpzOtUneeuQk4mV2065bXzhtjzcAWeSbKaMGyTdfuV1z6tlfeh58mRYrkTKPIgf4UhZzn81JyLJk//rtzrsI4c1rvvGs9cPk8KnWjXR2s7gyfKt0k86IOZDc+uHGF+VoFJmctOnKk0fPg9M3WKCWVfDMgEajhfOaQIDAQAB",
   "description": "A speed dial new tab. Your own icons, folders and pages, stored on your machine. No tracking, no CDN, no affiliate links.",
   "minimum_chrome_version": "110",
   "permissions": [
