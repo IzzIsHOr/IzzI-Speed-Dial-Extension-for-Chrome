@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PiP vs Web Audio</title>
+    <style>
+      body { font: 14px system-ui; background: #14161a; color: #eee; padding: 24px; }
+      video { width: 460px; background: #000; border-radius: 8px; display: block; }
+      button { padding: 9px 15px; margin: 0 8px 8px 0; border-radius: 7px; border: 1px solid #3a3f47;
+               background: #23262d; color: #eee; cursor: pointer; font: inherit; }
+      button.primary { background: #ef4444; border-color: #ef4444; }
+      pre { background: #1c1f24; padding: 14px; border-radius: 8px; white-space: pre-wrap;
+            line-height: 1.6; max-width: 720px; font-size: 13px; }
+      .peak { display: inline-block; width: 220px; height: 12px; background: #23262d;
+              border-radius: 6px; overflow: hidden; vertical-align: middle; }
+      .peak i { display: block; height: 100%; width: 0; background: #22c55e; }
+      h2 { margin-top: 0; }
+      .note { color: #9aa0a6; max-width: 720px; }
+    </style>
+  </head>
+  <body>
+    <h2>Does Picture-in-Picture survive a MediaElementAudioSourceNode?</h2>
+    <p class="note">
+      Native PiP mirrors the frames and leaves the video element in the page, so the audio
+      graph should be untouched. Document PiP moves the element into another document, which
+      is the thing that might break it. This tests both.
+    </p>
+
+    <div id="host"><video id="v" src="pip-test.mp4" controls loop></video></div>
+
+    <p>
+      <button id="wire" class="primary">1. Play and wire the audio</button>
+      <button id="native">2. Native PiP</button>
+      <button id="doc">2b. Document PiP</button>
+      <button id="back">3. Move back</button>
+    </p>
+
+    <p>live level: <span class="peak"><i id="bar"></i></span> <span id="num">0</span></p>
+    <pre id="log">ready</pre>
+
+    <script>
+      const logEl = document.getElementById("log");
+      const log = (m) => (logEl.textContent += "\n" + m);
+      const v = document.getElementById("v");
+      let ctx, analyser, data;
+
+      const peak = () => {
+        if (!analyser) return 0;
+        analyser.getByteFrequencyData(data);
+        return Math.max(...data);
+      };
+
+      document.getElementById("wire").onclick = async () => {
+        try {
+          ctx = new AudioContext();
+          await ctx.resume();
+          const src = ctx.createMediaElementSource(v);
+          const gain = ctx.createGain();
+          analyser = ctx.createAnalyser();
+          analyser.fftSize = 256;
+          data = new Uint8Array(analyser.frequencyBinCount);
+          src.connect(gain);
+          gain.connect(analyser);
+          analyser.connect(ctx.destination);
+          await v.play();
+          log("wired. context " + ctx.state + ", destination channels " + ctx.destination.channelCount);
+          log("if the bar below stays at 0, this clip has no audio and the test is void");
+          setInterval(() => {
+            const p = peak();
+            document.getElementById("bar").style.width = (p / 255) * 100 + "%";
+            document.getElementById("num").textContent = p;
+          }, 150);
+        } catch (e) {
+          log("WIRE FAILED: " + e.name + " - " + e.message);
+        }
+      };
+
+      document.getElementById("native").onclick = async () => {
+        try {
+          await v.requestPictureInPicture();
+          log("\nnative PiP open. element still in page: " + document.getElementById("host").contains(v));
+          setTimeout(() => log("peak while in native PiP: " + peak() + "   (0 = audio died)"), 1500);
+        } catch (e) {
+          log("NATIVE PIP FAILED: " + e.name + " - " + e.message);
+        }
+      };
+
+      document.getElementById("doc").onclick = async () => {
+        if (!window.documentPictureInPicture) return log("no documentPictureInPicture here");
+        try {
+          const w = await documentPictureInPicture.requestWindow({ width: 460, height: 280 });
+          w.document.body.style.margin = "0";
+          w.document.body.append(v);
+          log("\nmoved into a Document PiP window");
+          setTimeout(() => log("peak after the move: " + peak() + "   (0 = audio died)"), 1500);
+        } catch (e) {
+          log("DOCUMENT PIP FAILED: " + e.name + " - " + e.message);
+        }
+      };
+
+      document.getElementById("back").onclick = async () => {
+        if (document.pictureInPictureElement) await document.exitPictureInPicture();
+        document.getElementById("host").append(v);
+        setTimeout(() => log("peak after moving back: " + peak()), 1500);
+      };
+    </script>
+  </body>
+</html>

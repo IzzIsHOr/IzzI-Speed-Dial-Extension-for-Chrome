@@ -436,6 +436,26 @@ export async function clearSync() {
   }
 }
 
+/**
+ * Which browser this is, and whose account its sync rides on.
+ *
+ * chrome.storage.sync is not one shared store. Chrome syncs through the user's
+ * Google account, Edge through their Microsoft account, and the two never see
+ * each other. The same extension installed on both looks broken otherwise: a
+ * pull simply finds nothing and there is no way to guess why.
+ */
+export function browserInfo() {
+  const brands = (navigator.userAgentData && navigator.userAgentData.brands) || [];
+  const brand = (n) => brands.some((b) => b.brand.includes(n));
+  const ua = navigator.userAgent;
+
+  if (brand("Microsoft Edge") || /Edg\//.test(ua)) return { name: "Edge", account: "Microsoft" };
+  if (brand("Opera") || /OPR\//.test(ua)) return { name: "Opera", account: "Opera" };
+  if (brand("Brave")) return { name: "Brave", account: "Brave" };
+  if (brand("Google Chrome")) return { name: "Chrome", account: "Google" };
+  return { name: "this browser", account: "the browser" };
+}
+
 /** Tells the page when another device has written to sync. */
 export function onRemoteChange(cb) {
   chrome.storage.onChanged.addListener((changes, area) => {

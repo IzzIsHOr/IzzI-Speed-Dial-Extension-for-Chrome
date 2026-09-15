@@ -19,7 +19,8 @@ import {
   clearSync,
   setWallpaper,
   loadDoc,
-  gcBlobs
+  gcBlobs,
+  browserInfo
 } from "../lib/store.js";
 import { downloadBackup, pickBackupFile, restoreBackup } from "../lib/backup.js";
 import {
@@ -571,11 +572,12 @@ export function settingsDialog(settings, { onChange, onReload }) {
 
           section(
             "Sync through your Google account",
-            "Chrome allows 100 KB. Layout, settings and small icons fit. " +
-              "Background images and full-size originals stay on this computer.",
+            `Rides on your ${browserInfo().account} account, and allows 100 KB. Layout, ` +
+              "settings and small icons fit. Background images and full-size originals " +
+              "stay on this computer.",
             row(
               "Keep devices in sync",
-              "The account Chrome is signed into",
+              `The account ${browserInfo().name} is signed into`,
               toggle(settings.sync.enabled, (v) => {
                 settings.sync.enabled = v;
                 apply();
@@ -624,7 +626,7 @@ export function settingsDialog(settings, { onChange, onReload }) {
                   onclick: async () => {
                     const r = await pullSync({ force: true });
                     if (r.error) return toast("That did not work: " + r.error);
-                    if (r.nothing) return toast("There is nothing in sync.");
+                    if (r.nothing) return emptySyncDialog();
                     onReload();
                     toast("Pulled from sync.");
                   }
@@ -687,6 +689,52 @@ export function settingsDialog(settings, { onChange, onReload }) {
             )
           )
         );
+
+        /**
+         * A pull that finds nothing is nearly always one of two things, and
+         * "there is nothing in sync" helps with neither. The usual cause is
+         * crossing browsers: each one syncs through its own account, so the
+         * same extension on Chrome and Edge never sees its own data.
+         */
+        function emptySyncDialog() {
+          const b = browserInfo();
+          openDialog({
+            title: "Nothing in sync yet",
+            build: ({ close, body, footer }) => {
+              body.append(
+                el("p", {
+                  class: "note",
+                  text:
+                    `This copy syncs through your ${b.account} account, and there is nothing ` +
+                    "stored there yet."
+                }),
+                el("p", {
+                  class: "note warn",
+                  text:
+                    "Sync does not cross browsers. Chrome syncs through your Google account " +
+                    `and Edge through your Microsoft one, so what you set up in another ` +
+                    "browser is not reachable from here, however long you wait."
+                }),
+                el("p", {
+                  class: "note",
+                  text:
+                    "To carry your shortcuts across: on the browser that has them, use " +
+                    "Export under Backup file, then Import (replace) here. That file holds " +
+                    "everything at full resolution, including the background image."
+                }),
+                el("p", {
+                  class: "note",
+                  text:
+                    `If you meant to sync ${b.name} with another computer running ${b.name}, ` +
+                    "press Send now on the one that has your shortcuts first."
+                })
+              );
+              footer.append(
+                el("button", { class: "btn primary", onclick: () => close(true) }, "Got it")
+              );
+            }
+          });
+        }
 
         async function refreshStatus() {
           const s = await syncStatus();
