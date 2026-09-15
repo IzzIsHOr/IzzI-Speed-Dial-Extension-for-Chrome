@@ -79,6 +79,9 @@ wallpaper all come across in one step.
 
 Open source, MIT licensed:
 https://github.com/IzzIsHOr/IzzI-Speed-Dial-Extension-for-Chrome
+
+Free, and staying that way. If it saved you some clicking and you feel like it:
+https://buymeacoffee.com/izzishor
 ```
 
 ## Category
